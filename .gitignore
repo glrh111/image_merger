@@ -1,0 +1,9 @@
+# ide
+.idea/
+
+# test images
+dest_image/
+src_image*/
+
+# test videos
+*.avi
