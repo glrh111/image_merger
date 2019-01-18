@@ -53,7 +53,7 @@ class VideoSplitter(object):
 
 
 @click.command()
-@click.option('--video_name', default="src_video_2.mp4", help='dest image width')
+@click.option('--video_name', default="src_video_9.mp4", help='dest image width')
 def main(video_name):
     VideoSplitter(video_name).gogogo()
 

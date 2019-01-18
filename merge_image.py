@@ -9,11 +9,11 @@
 TODO
 
 显示进度
+不支持UTF-8的问题
 
 做几个视频：
 + 天桥长曝光
 + 哆啦A梦
-+ 嘿嘿嘿
 
 写成文章
 """
@@ -101,7 +101,7 @@ class ImageMerger(object):
 
     def save_image_to_file(self, image, filename):
         cv2.imwrite(filename, image)
-        print "Save to: {}".format(filename)
+        # print "Save to: {}".format(filename)
 
     def image_sequence_to_video(self):
         fourcc = cv2.VideoWriter_fourcc(*'DIVX')  # DIVX  X264
@@ -162,7 +162,7 @@ class ImageMerger(object):
         total_image = np.zeros((total_height, total_width, 3))
 
         scaled_height, scaled_width = scaled_image.shape[:2]
-        print "scaled_height, scaled_width: ", scaled_height, scaled_width, total_image.shape
+        # print "scaled_height, scaled_width: ", scaled_height, scaled_width, total_image.shape
         width_padding, height_padding = map(
             lambda (x, y): int((x - y) / 2),
             ((total_width, scaled_width), (total_height, scaled_height))
@@ -264,7 +264,7 @@ def scale_image(dest_width, dest_height, src_image):
 @click.option('--height', default=600, help='dest image width')
 @click.option('--dest_mode', default=DestMode.DestAndSrcWithBac, help='dest_mode')
 @click.option('--frame_rate', default=3, help='frame_rate')
-@click.option('--src_folder', default="./src_video_2_video_slices_1547811862883/", help='dest image width')
+@click.option('--src_folder', default="./src_video_9_video_slices_1547825796608/", help='dest image width')
 # @click.argument('src_folder')
 def main(width, height, dest_mode, frame_rate, src_folder):
     ImageMerger(width, height, dest_mode, frame_rate, src_folder).gogogo()

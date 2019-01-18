@@ -5,6 +5,8 @@
 dest_image/
 src_image*/
 src_video*/
+asserts/
+rick*/
 
 # test videos
 *.avi
