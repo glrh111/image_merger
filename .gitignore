@@ -4,6 +4,8 @@
 # test images
 dest_image/
 src_image*/
+src_video*/
 
 # test videos
 *.avi
+*.mp4

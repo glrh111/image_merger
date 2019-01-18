@@ -2,11 +2,31 @@
 # coding: utf-8
 
 
+"""
+可以干啥？
+实现长曝光
+
+TODO
+
+显示进度
+
+做几个视频：
++ 天桥长曝光
++ 哆啦A梦
++ 嘿嘿嘿
+
+写成文章
+"""
+
+
 import click
 import numpy as np
 from PIL import Image
 import cv2
 import os
+import sys
+import time
+import uuid
 
 
 class DestMode:
@@ -29,56 +49,37 @@ class BacSize:
 class ImageMerger(object):
     """merge images to one"""
 
-    def __init__(self):
-        self.dest_mode = DestMode.DestAndSrcWithBac
+    def __init__(self, width, height, dest_mode, frame_rate, src_folder):
+        self.dest_mode = dest_mode
+        self.frame_rate = frame_rate
 
-        # 计算背景尺寸
-        if self.dest_mode == DestMode.DestAndSrcWithBac:
-            self.bac_width = BacSize.Width / 2
-            self.bac_height = BacSize.Height / 2
-        else:
-            self.bac_width = BacSize.Width
-            self.bac_height = BacSize.Height
+        # 从这里读取图片信息
+        self.src_folder = os.path.abspath(src_folder)
+        if not os.path.isdir(self.src_folder):
+            sys.exit("{} is not a dir.".format(src_folder))
 
-        # dest_image
-        self.current_total_rgb_counter = None
+        # 写入这里 由 src_folder_name 生成
+        src_foler_head, src_foler_tail = os.path.split(self.src_folder)
+        current_timestamp = int(time.time() * 1000)
+        self.dest_folder = os.path.join(
+            src_foler_head,
+            "{}_{}_{}".format(src_foler_tail, current_timestamp, uuid.uuid4().hex)
+        )
+        os.mkdir(self.dest_folder)
 
-        # dest 的某个像素点merge了多少图像，最后分像素点取平均
-        # self.merge_counter = None
+        # 视频写入这里
+        self.dest_video_name = "merged_video_{}_{}.avi".format(src_foler_tail, current_timestamp)
 
         # dest_image 的信息
         self.dest_image = None
-        self.dest_width = 500
-        self.dest_height = 500
+        self.dest_width = width
+        self.dest_height = height
+
+        # dest_image
+        self.current_total_rgb_counter = np.zeros((self.dest_height, self.dest_width, 4))
 
         # src_image 下一张将要 merge 的照片
         self.next_src_image = None
-
-        # dest_with_bac_image 将dest_image 缩放到 bac 尺寸并加上背景的
-        self.dest_with_bac_image = None
-
-        # 将 next_src 缩放到 bac 尺寸并加上背景的
-        self.next_src_with_bac_image = None
-
-        #
-        self.dest_and_src_with_bac_image = None
-
-        # 从这里读取图片信息
-        self.src_folder = "./src_image/"
-
-        # 写入这里
-        self.dest_folder = "./dest_image/"
-
-        # 视频写入这里
-        self.dest_video_name = "wocao.avi"
-
-        # 初始化一些变量
-        self.init()
-
-    def init(self):
-        #
-        self.current_total_rgb_counter = np.zeros((self.dest_height, self.dest_width, 4))
-        # self.merge_counter = np.zeros((self.dest_height, self.dest_width))
 
     def next_src_image_name(self):
         return self.next_image(self.src_folder)
@@ -104,7 +105,7 @@ class ImageMerger(object):
 
     def image_sequence_to_video(self):
         fourcc = cv2.VideoWriter_fourcc(*'DIVX')  # DIVX  X264
-        out = cv2.VideoWriter(self.dest_video_name, fourcc, 3, (BacSize.Width, BacSize.Height))
+        out = cv2.VideoWriter(self.dest_video_name, fourcc, self.frame_rate, (BacSize.Width, BacSize.Height))
         for image_name in self.next_image(self.dest_folder):
             frame = self.read_image(image_name)
             out.write(frame)
@@ -160,7 +161,8 @@ class ImageMerger(object):
         scaled_image = self.scale_image(total_width, total_height, src_image)
         total_image = np.zeros((total_height, total_width, 3))
 
-        scaled_height, scaled_width = src_image.shape[:2]
+        scaled_height, scaled_width = scaled_image.shape[:2]
+        print "scaled_height, scaled_width: ", scaled_height, scaled_width, total_image.shape
         width_padding, height_padding = map(
             lambda (x, y): int((x - y) / 2),
             ((total_width, scaled_width), (total_height, scaled_height))
@@ -258,8 +260,14 @@ def scale_image(dest_width, dest_height, src_image):
 
 
 @click.command()
-def main():
-    ImageMerger().gogogo()
+@click.option('--width', default=600, help='dest image width')
+@click.option('--height', default=600, help='dest image width')
+@click.option('--dest_mode', default=DestMode.DestAndSrcWithBac, help='dest_mode')
+@click.option('--frame_rate', default=3, help='frame_rate')
+@click.option('--src_folder', default="./src_video_2_video_slices_1547811862883/", help='dest image width')
+# @click.argument('src_folder')
+def main(width, height, dest_mode, frame_rate, src_folder):
+    ImageMerger(width, height, dest_mode, frame_rate, src_folder).gogogo()
 
 
 if __name__ == '__main__':
@@ -275,4 +283,14 @@ https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_geometric_transf
 
 视频简单操作
 https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_gui/py_video_display/py_video_display.html#display-video
+
+打tag
+git tag -a v1.4 -m "my version 1.4"
+git push origin v1.4
+
+click
+https://click.palletsprojects.com/en/7.x/
+
+启动程序
+python merge_image.py --width 600 --height 600 ./src_image/
 """
